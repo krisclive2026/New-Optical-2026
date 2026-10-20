@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Track Optical Order - VisionCraft OSMS{% endblock %}
+{% block page_title %}Order Status Tracking{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 text-center">
+                <i class="fa-solid fa-location-crosshairs text-primary fs-2 mb-2 d-block"></i>
+                <h5 class="m-0 font-weight-bold text-primary">Track Optical Order Progress</h5>
+                <p class="text-muted small mb-0">Enter Order Number or Customer Phone Number to check real-time status</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="GET" action="{{ url_for('order_track') }}">
+                    <div class="input-group input-group-lg mb-3">
+                        <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" name="query" class="form-control" placeholder="Enter Order # (e.g. ORD-20260924-1234) or Phone #" value="{{ query or '' }}" required autofocus>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">Search Order</button>
+                    </div>
+                </form>
+
+                {% if searched %}
+                    {% if matched_orders %}
+                    <h6 class="fw-bold text-primary mt-4 mb-3">Found Matching Orders ({{ matched_orders|length }})</h6>
+                    <div class="list-group">
+                        {% for ord in matched_orders %}
+                        <div class="list-group-item list-group-item-action p-3 mb-2 rounded-3 border">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0 text-primary">{{ ord.order_number }}</h6>
+                                <span class="badge badge-status badge-{{ ord.status|lower|replace(' ', '-') }} fs-6">{{ ord.status }}</span>
+                            </div>
+                            <div class="row fs-7 text-muted">
+                                <div class="col-md-4">
+                                    <p class="mb-1"><strong>Customer:</strong> {{ ord.customer.name }}</p>
+                                    <p class="mb-0"><strong>Phone:</strong> {{ ord.customer.phone }}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="mb-1"><strong>Order Date:</strong> {{ ord.order_date.strftime('%Y-%m-%d') }}</p>
+                                    <p class="mb-0"><strong>Delivery Date:</strong> {{ ord.expected_delivery_date.strftime('%Y-%m-%d') if ord.expected_delivery_date else 'N/A' }}</p>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                                    <a href="{{ url_for('invoice_view', invoice_id=ord.invoice.id) if ord.invoice else url_for('invoice_create', order_id=ord.id) }}" class="btn btn-sm btn-outline-primary fw-semibold">
+                                        View Invoice <i class="fa-solid fa-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning text-center my-4 py-4">
+                        <i class="fa-solid fa-circle-exclamation fs-2 mb-2 d-block text-warning"></i>
+                        No order records found matching "<strong>{{ query }}</strong>". Please check the order number or phone.
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,666 @@
+/* VisionCraft OSMS - Optical Store Management System Custom Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+:root {
+    --primary-color: #0f4c81;
+    --primary-hover: #0a365c;
+    --primary-light: #eef6fc;
+    --secondary-color: #0284c7;
+    --accent-color: #06b6d4;
+    --dark-bg: #0f172a;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --sidebar-width: 260px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(15, 76, 129, 0.08);
+    --shadow-lg: 0 10px 25px rgba(15, 76, 129, 0.12);
+}
+
+html {
+    background-color: #f8fafc;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f8fafc;
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-font {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* App Wrapper & Layout */
+#app-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Sidebar Styling */
+#sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #0f4c81 0%, #082f49 100%);
+    color: #ffffff;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+    /* Fixed to the viewport so the logo/header stays visible while the page scrolls */
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+#sidebar .sidebar-header {
+    padding: 1.5rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    /* Pinned to the top of the sidebar's own scroll area, so the long nav
+       list scrolls underneath it instead of carrying it off screen. */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(180deg, #0f4c81 0%, #082f49 100%);
+    gap: 0.75rem;
+}
+
+#sidebar .sidebar-header i {
+    font-size: 1.8rem;
+    color: var(--accent-color);
+}
+
+#sidebar .sidebar-header h4 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+#sidebar ul.components {
+    padding: 1rem 0;
+    list-style: none;
+    margin: 0;
+}
+
+#sidebar ul li a {
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+}
+
+#sidebar ul li a:hover, 
+#sidebar ul li.active > a {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--accent-color);
+}
+
+#sidebar ul li a i {
+    font-size: 1.1rem;
+    width: 22px;
+    text-align: center;
+}
+
+/* Main Content Area */
+#main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Sidebar is fixed and no longer takes up flex space, so push content over */
+    margin-left: var(--sidebar-width);
+}
+
+/* Top Navigation Bar */
+.top-navbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.85rem 4.25rem 0.85rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+}
+
+.top-navbar .page-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.top-navbar .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Dashboard Metric Cards */
+.metric-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.metric-card .icon-shape {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.metric-card .metric-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.2;
+    margin-top: 0.5rem;
+}
+
+.metric-card .metric-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+/* Prescription OD/OS Table Styling */
+.prescription-table {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.prescription-table th {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 700;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 0.75rem;
+}
+
+.prescription-table td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.prescription-table td.eye-label {
+    font-weight: 700;
+    background: #f1f5f9;
+    color: var(--dark-bg);
+}
+
+.prescription-table input {
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Status Badges */
+.badge-status {
+    padding: 0.4em 0.85em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.badge-new { background-color: #e0f2fe; color: #0369a1; }
+.badge-processing { background-color: #fef3c7; color: #b45309; }
+.badge-lens-ordered { background-color: #ede9fe; color: #6d28d9; }
+.badge-ready { background-color: #dcfce7; color: #15803d; }
+.badge-delivered { background-color: #d1fae5; color: #047857; }
+.badge-cancelled { background-color: #fee2e2; color: #b91c1c; }
+
+.badge-paid { background-color: #d1fae5; color: #047857; }
+.badge-partial { background-color: #fef3c7; color: #b45309; }
+.badge-pending { background-color: #fee2e2; color: #b91c1c; }
+
+/* Product Cards for Frames */
+.frame-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.frame-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--secondary-color);
+}
+
+.frame-card .frame-img-container {
+    height: 180px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 1rem;
+}
+
+.frame-card .frame-img-container img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+/* Tables styling */
+.custom-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.custom-table th {
+    background: #f8fafc;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.85rem 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.custom-table td {
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.custom-table tr:hover td {
+    background-color: #f1f5f9;
+}
+
+/* Print Invoice Styling */
+@media print {
+    #sidebar, .top-navbar, .no-print {
+        display: none !important;
+    }
+    #app-wrapper, #main-content {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* =========================================================
+   PROFESSIONAL AUTHENTICATION PAGES (LOGIN & REGISTER)
+   ========================================================= */
+.auth-page-bg {
+    background: radial-gradient(circle at top left, #1e3a8a 0%, #0f4c81 40%, #0b192c 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-page-bg::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.15) 0%, rgba(2, 132, 199, 0) 70%);
+    top: -100px;
+    right: -100px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: authCardFadeIn 0.5s ease-out forwards;
+}
+
+@keyframes authCardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.auth-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 2.25rem 2rem 1.75rem 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.auth-logo-badge {
+    width: 68px;
+    height: 68px;
+    background: linear-gradient(135deg, #0f4c81 0%, #0284c7 100%);
+    color: #ffffff;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 10px 20px rgba(15, 76, 129, 0.3);
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.auth-logo-badge:hover {
+    transform: rotate(6deg) scale(1.05);
+}
+
+.auth-header h3 {
+    font-weight: 800;
+    color: var(--primary-color);
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.auth-header p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.auth-body {
+    padding: 2rem;
+}
+
+.auth-form-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.auth-input-group {
+    position: relative;
+    margin-bottom: 1.25rem;
+}
+
+.auth-input-group .input-group-text {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #64748b;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    transition: all 0.2s ease;
+}
+
+.auth-input-group .form-control,
+.auth-input-group .form-select {
+    border-color: #cbd5e1;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #0f172a;
+    transition: all 0.2s ease;
+}
+
+.auth-input-group .form-control:focus,
+.auth-input-group .form-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+    background-color: #ffffff;
+}
+
+.auth-input-group:focus-within .input-group-text {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+    background-color: #e0f2fe;
+}
+
+.btn-auth-primary {
+    background: linear-gradient(135deg, #0f4c81 0%, #0284c7 100%);
+    border: none;
+    color: #ffffff;
+    padding: 0.85rem;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 14px rgba(15, 76, 129, 0.3);
+    transition: all 0.2s ease;
+}
+
+.btn-auth-primary:hover {
+    background: linear-gradient(135deg, #0a365c 0%, #0369a1 100%);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 76, 129, 0.4);
+}
+
+.btn-auth-primary:active {
+    transform: translateY(0);
+}
+
+.auth-switch-box {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.auth-switch-link {
+    color: var(--secondary-color);
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    margin-left: 0.35rem;
+}
+
+.auth-switch-link:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.demo-credentials-badge {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    color: #475569;
+    margin-top: 1.25rem;
+}
+
+
+/* ---------------------------------------------------------
+   Desktop (pywebview) exit button
+   Fixed to the top-right corner on every page. The top-navbar
+   gets extra right padding (below) so the profile dropdown
+   never sits underneath it.
+--------------------------------------------------------- */
+.webview-exit-btn {
+    position: fixed;
+    top: 14px;
+    right: 16px;
+    z-index: 2000;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(15, 23, 42, 0.55);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.webview-exit-btn:hover {
+    background: #dc2626;
+    transform: scale(1.06);
+}
+
+.webview-exit-btn:active {
+    transform: scale(0.96);
+}
+
+/* =========================================================
+   ABOUT SCREEN
+   ========================================================= */
+.about-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2.5rem;
+}
+
+.about-card {
+    width: 100%;
+    max-width: 560px;
+    background: radial-gradient(circle at top left, #1e3a8a 0%, #0f4c81 35%, var(--dark-bg) 100%);
+    border-radius: 22px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    color: #f1f5f9;
+    padding: 2.75rem 2.25rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: authCardFadeIn 0.5s ease-out forwards;
+}
+
+.about-card::before {
+    content: '';
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.18) 0%, rgba(2, 132, 199, 0) 70%);
+    top: -140px;
+    right: -120px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.about-logo-badge {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1.1rem;
+    background: linear-gradient(135deg, #0f4c81 0%, #06b6d4 100%);
+    color: #fff;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.1rem;
+    box-shadow: 0 10px 24px rgba(6, 182, 212, 0.35);
+}
+
+.about-app-name {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.35rem;
+    color: #ffffff;
+}
+
+.about-tagline {
+    font-size: 0.98rem;
+    color: #cbd5e1;
+    margin-bottom: 1.5rem;
+}
+
+.about-developer {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+}
+
+.about-contact {
+    font-size: 0.95rem;
+    color: #e2e8f0;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.about-divider {
+    border-color: rgba(255, 255, 255, 0.15);
+    margin: 1.5rem 0 1.1rem;
+}
+
+.about-footer {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    line-height: 1.6;
+}
+
+.about-footer strong {
+    color: #e2e8f0;
+}
+
+.about-license-line {
+    font-size: 0.82rem;
+    margin-top: 0.4rem;
+}
+
+.about-license-line.licensed {
+    color: #4ade80;
+}
+
+.about-license-line.unlicensed {
+    color: #f87171;
+}

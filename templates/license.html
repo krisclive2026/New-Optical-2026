@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Activation - VisionCraft OSMS</title>
+    <!-- Deliberately NO Bootstrap / Font Awesome CDN links: this is the page an
+         expired or unactivated user is sent to, so it must look right even
+         when the computer is offline. Only the local style.css is used. -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        .auth-card { font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; }
+        .lic-alert { border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.85rem; line-height: 1.45; margin-bottom: 1.1rem; border: 1px solid; }
+        .lic-alert.success { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+        .lic-alert.danger  { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+        .lic-alert.warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+        .lic-alert.info    { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+        .lic-step { display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem; }
+        .lic-row { display: flex; gap: 0.5rem; margin-bottom: 0.35rem; }
+        .lic-input, .lic-textarea {
+            width: 100%; padding: 0.7rem 0.85rem; font-size: 0.95rem; color: #0f172a;
+            background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; outline: none;
+        }
+        .lic-input { text-align: center; font-weight: 700; letter-spacing: 0.04em; font-family: Consolas, "Courier New", monospace; }
+        .lic-textarea { font-family: Consolas, "Courier New", monospace; font-size: 0.85rem; resize: vertical; min-height: 96px; margin-bottom: 1rem; }
+        .lic-input:focus, .lic-textarea:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18); }
+        .lic-copy { flex: none; padding: 0 1rem; font-size: 0.85rem; font-weight: 700; color: #0f4c81; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; cursor: pointer; }
+        .lic-copy:hover { background: #dbeafe; }
+        .lic-hint { font-size: 0.8rem; color: #64748b; margin-bottom: 1.4rem; }
+        .lic-submit { display: block; width: 100%; cursor: pointer; border-radius: 12px; }
+        .lic-badge-svg { width: 34px; height: 34px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+</head>
+<body class="auth-page-bg">
+    <button type="button" class="webview-exit-btn" title="Exit application" aria-label="Exit application" style="font-size:1.2rem;line-height:1;">&times;</button>
+    <script src="{{ url_for('static', filename='js/webview_exit.js') }}"></script>
+
+    <div class="auth-card" style="max-width:560px">
+        <div class="auth-header">
+            <div class="auth-logo-badge">
+                <svg class="lic-badge-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="8" cy="15" r="4"></circle>
+                    <path d="M10.85 12.15 19 4"></path>
+                    <path d="m18 5 3 3"></path>
+                    <path d="m15 8 3 3"></path>
+                </svg>
+            </div>
+            <h3>License {% if status.expiry_date and not status.activated %}Renewal{% else %}Activation{% endif %}</h3>
+            <p>VisionCraft OSMS &middot; KriscSoft</p>
+        </div>
+
+        <div class="auth-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="lic-alert {{ category }}" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            {% if status.activated %}
+                <div class="lic-alert success">
+                    Licensed until <b>{{ status.expiry_date }}</b> &middot; {{ status.days_left }} days remaining.
+                    You can enter a new key below to renew early.
+                </div>
+            {% elif status.expiry_date %}
+                <div class="lic-alert danger">
+                    Your license expired on <b>{{ status.expiry_date }}</b>. Send the System ID below to KriscSoft to get a renewal key.
+                </div>
+            {% else %}
+                <div class="lic-alert warning">
+                    This software is not activated yet. Send the System ID below to KriscSoft to get your license key.
+                </div>
+            {% endif %}
+
+            <label class="lic-step" for="systemId">1. Your System ID</label>
+            <div class="lic-row">
+                <input type="text" id="systemId" class="lic-input" value="{{ system_id }}" readonly>
+                <button type="button" class="lic-copy" id="copyBtn">Copy</button>
+            </div>
+            <div class="lic-hint">Send this ID to the developer (Contact: 9894295732).</div>
+
+            <form method="POST" action="{{ url_for('license_page') }}">
+                <label class="lic-step" for="licenseKey">2. Paste the License Key you received</label>
+                <textarea id="licenseKey" name="license_key" class="lic-textarea" rows="4" placeholder="Paste license key here" required></textarea>
+                <button type="submit" class="btn-auth-primary lic-submit">
+                    {% if status.expiry_date and not status.activated %}Renew License{% else %}Activate License{% endif %}
+                </button>
+            </form>
+
+            {% if status.activated %}
+            <div class="auth-switch-box">
+                <a href="{{ url_for('dashboard') }}" class="auth-switch-link">&larr; Back to app</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('copyBtn').addEventListener('click', function () {
+            var box = document.getElementById('systemId');
+            var btn = this;
+            box.select();
+            var done = function () { btn.textContent = 'Copied \u2713'; };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(box.value).then(done, function () { document.execCommand('copy'); done(); });
+            } else {
+                document.execCommand('copy'); done();
+            }
+        });
+    </script>
+</body>
+</html>

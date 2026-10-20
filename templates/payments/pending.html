@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Pending Payments - VisionCraft OSMS{% endblock %}
+{% block page_title %}Outstanding & Pending Payments Summary{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-danger text-white">
+            <div class="card-body p-4">
+                <span class="text-white-50 uppercase fs-7 fw-bold">TOTAL OUTSTANDING BALANCE</span>
+                <h2 class="fw-bold mb-0">${{ "%.2f"|format(total_pending_amount) }}</h2>
+                <small class="text-white-50">Across {{ pending_invoices|length }} pending invoice(s)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-danger"><i class="fa-solid fa-hand-holding-dollar me-2"></i> Invoices with Outstanding Balance</h6>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Invoice Date</th>
+                    <th>Total Amount ($)</th>
+                    <th>Paid Amount ($)</th>
+                    <th>Outstanding Balance ($)</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if pending_invoices %}
+                    {% for inv in pending_invoices %}
+                    <tr>
+                        <td><a href="{{ url_for('invoice_view', invoice_id=inv.id) }}" class="fw-bold text-primary">{{ inv.invoice_number }}</a></td>
+                        <td class="fw-semibold">{{ inv.customer.name }}</td>
+                        <td>{{ inv.customer.phone }}</td>
+                        <td>{{ inv.invoice_date.strftime('%Y-%m-%d') }}</td>
+                        <td class="fw-bold">${{ "%.2f"|format(inv.total_amount) }}</td>
+                        <td class="text-success">${{ "%.2f"|format(inv.paid_amount) }}</td>
+                        <td class="fw-bold text-danger fs-6">${{ "%.2f"|format(inv.balance_amount) }}</td>
+                        <td class="text-end">
+                            <a href="{{ url_for('invoice_view', invoice_id=inv.id) }}" class="btn btn-sm btn-success fw-semibold">
+                                <i class="fa-solid fa-hand-holding-dollar me-1"></i> Collect Balance
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-success py-5">
+                            <i class="fa-solid fa-circle-check fs-1 mb-3 d-block"></i>
+                            Great news! All invoices are fully settled. No pending balances.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

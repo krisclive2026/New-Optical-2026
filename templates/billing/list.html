@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Bills - VisionCraft OSMS{% endblock %}
+{% block page_title %}Invoices & Billing{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <h6 class="m-0 fw-bold text-primary"><i class="fa-solid fa-file-invoice me-2"></i> All Bills</h6>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="input-group input-group-sm" style="width:260px">
+                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" id="bill-search" class="form-control" placeholder="Search bill # or customer...">
+            </div>
+            <a href="{{ url_for('invoice_create_direct') }}" class="btn btn-primary btn-sm fw-semibold"><i class="fa-solid fa-plus me-1"></i> Generate Bill</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0" id="bill-table">
+            <thead>
+                <tr><th>Bill #</th><th>Customer</th><th>Date</th><th class="text-center">Items</th><th class="text-end">Total</th><th class="text-end">Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for inv in invoices %}
+                <tr>
+                    <td><a href="{{ url_for('invoice_view', invoice_id=inv.id) }}" class="fw-bold text-primary">{{ inv.invoice_number }}</a></td>
+                    <td>{{ inv.customer.name }}<small class="d-block text-muted">{{ inv.customer.phone }}</small></td>
+                    <td>{{ inv.invoice_date.strftime('%d %b %Y') }}</td>
+                    <td class="text-center">{{ item_counts.get(inv.id, '-') }}</td>
+                    <td class="text-end fw-bold">₹{{ "%.2f"|format(inv.total_amount) }}</td>
+                    <td class="text-end">
+                        <a href="{{ url_for('invoice_view', invoice_id=inv.id) }}" class="btn btn-sm btn-outline-primary" title="View"><i class="fa-solid fa-eye"></i></a>
+                        <a href="{{ url_for('invoice_pdf', invoice_id=inv.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="PDF"><i class="fa-solid fa-file-pdf"></i></a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-5">No bills yet. Click <b>Generate Bill</b> to create the first one.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('bill-search').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#bill-table tbody tr').forEach(r => r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none');
+});
+</script>
+{% endblock %}

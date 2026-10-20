@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}New Prescription - VisionCraft OSMS{% endblock %}
+{% block page_title %}Record Eye Test Prescription{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-eye me-2"></i> Eye Test Details & Optical Parameters</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('prescription_create') }}">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Customer <span class="text-danger">*</span></label>
+                            <select name="customer_id" class="form-select" required>
+                                <option value="">-- Choose Customer --</option>
+                                {% for cust in customers %}
+                                <option value="{{ cust.id }}" {% if selected_customer_id and selected_customer_id == cust.id %}selected{% endif %}>
+                                    {{ cust.name }} ({{ cust.phone }}) [{{ cust.customer_code }}]
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Exam / Prescription Date</label>
+                            <input type="date" name="prescription_date" class="form-control" value="{{ today_date }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Optometrist / Doctor</label>
+                            <input type="text" name="doctor_name" class="form-control" placeholder="Dr. Smith" value="{{ current_user.name }}">
+                        </div>
+                    </div>
+
+                    <!-- Prescription Matrix Table -->
+                    <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-table-cells me-1"></i> Refraction Measurement Matrix</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered prescription-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">Eye</th>
+                                    <th>SPH (Spherical)</th>
+                                    <th>CYL (Cylinder)</th>
+                                    <th>AXIS (Degree)</th>
+                                    <th>ADD (Addition)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="eye-label">Right Eye (OD)</td>
+                                    <td><input type="text" name="spherical_od" class="form-control text-center" placeholder="-1.25" value="0.00"></td>
+                                    <td><input type="text" name="cyl_od" class="form-control text-center" placeholder="-0.50" value="0.00"></td>
+                                    <td><input type="text" name="axis_od" class="form-control text-center" placeholder="90" value="0"></td>
+                                    <td><input type="text" name="add_od" class="form-control text-center" placeholder="+1.50" value="0.00"></td>
+                                </tr>
+                                <tr>
+                                    <td class="eye-label">Left Eye (OS)</td>
+                                    <td><input type="text" name="spherical_os" class="form-control text-center" placeholder="-1.50" value="0.00"></td>
+                                    <td><input type="text" name="cyl_os" class="form-control text-center" placeholder="-0.75" value="0.00"></td>
+                                    <td><input type="text" name="axis_os" class="form-control text-center" placeholder="180" value="0"></td>
+                                    <td><input type="text" name="add_os" class="form-control text-center" placeholder="+1.50" value="0.00"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Pupillary Distance (PD mm)</label>
+                            <input type="text" name="pd" class="form-control" placeholder="e.g. 63">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Near PD (mm)</label>
+                            <input type="text" name="near_pd" class="form-control" placeholder="e.g. 60">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Next Recommended Test Date</label>
+                            <input type="date" name="next_test_date" class="form-control" value="{{ next_year_date }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Prescription Notes / Visual Acuity Notes</label>
+                            <textarea name="notes" class="form-control" rows="2" placeholder="e.g. Single vision distance glass required, VA 6/6 OU"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <a href="{{ url_for('prescriptions_list') }}" class="btn btn-light px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="fa-solid fa-save me-1"></i> Save Prescription
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

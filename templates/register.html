@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Account - VisionCraft OSMS</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page-bg">
+    <div class="auth-card" style="max-width: 520px;">
+        <!-- Header Branding -->
+        <div class="auth-header">
+            <div class="auth-logo-badge">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h3>Create Your Account</h3>
+            <p>VisionCraft OSMS - Optical Store Management System</p>
+        </div>
+
+        <!-- Auth Body Form -->
+        <div class="auth-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show text-start small mb-3 shadow-sm" role="alert">
+                            <i class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="row g-2">
+                    <!-- Full Name Field -->
+                    <div class="col-12 mb-2">
+                        <label class="auth-form-label">
+                            <span>Full Name <span class="text-danger">*</span></span>
+                        </label>
+                        <div class="input-group auth-input-group mb-0">
+                            <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. Dr. Sarah Jenkins" required autofocus>
+                        </div>
+                    </div>
+
+                    <!-- Username Field -->
+                    <div class="col-md-6 mb-2">
+                        <label class="auth-form-label">
+                            <span>Username <span class="text-danger">*</span></span>
+                        </label>
+                        <div class="input-group auth-input-group mb-0">
+                            <span class="input-group-text"><i class="fa-solid fa-at"></i></span>
+                            <input type="text" name="username" class="form-control" placeholder="e.g. sjenkins" required>
+                        </div>
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="col-md-6 mb-2">
+                        <label class="auth-form-label">
+                            <span>Email Address</span>
+                        </label>
+                        <div class="input-group auth-input-group mb-0">
+                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                            <input type="email" name="email" class="form-control" placeholder="sarah@example.com">
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="col-md-6 mb-2">
+                        <label class="auth-form-label">
+                            <span>Password <span class="text-danger">*</span></span>
+                        </label>
+                        <div class="input-group auth-input-group mb-0">
+                            <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                            <input type="password" name="password" id="regPassword" class="form-control" placeholder="Set password" required>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password Field -->
+                    <div class="col-md-6 mb-2">
+                        <label class="auth-form-label">
+                            <span>Confirm Password <span class="text-danger">*</span></span>
+                        </label>
+                        <div class="input-group auth-input-group mb-0">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" name="confirm_password" id="regConfirmPassword" class="form-control" placeholder="Re-enter password" required>
+                        </div>
+                    </div>
+
+                    <!-- Role Selection -->
+                    <div class="col-12 mb-3">
+                        <label class="auth-form-label">
+                            <span>System Access Role</span>
+                        </label>
+                        <div class="input-group auth-input-group mb-0">
+                            <span class="input-group-text"><i class="fa-solid fa-user-shield"></i></span>
+                            <select name="role" class="form-select">
+                                <option value="Staff" selected>Staff Optician (Customer, Prescription, Orders & Billing)</option>
+                                <option value="Admin">System Administrator (Full Store Access & Analytics)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Action Button -->
+                <button type="submit" class="btn btn-auth-primary w-100 my-2 shadow-sm">
+                    <i class="fa-solid fa-user-check me-2"></i> Create Account
+                </button>
+            </form>
+
+            <!-- Switch to Login Link -->
+            <div class="auth-switch-box">
+                Already have an account?
+                <a href="{{ url_for('login') }}" class="auth-switch-link">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i> Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

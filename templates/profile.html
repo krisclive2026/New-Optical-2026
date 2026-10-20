@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}User Profile - VisionCraft OSMS{% endblock %}
+{% block page_title %}Profile & Account Settings{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-user-gear me-2"></i> Account Details</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('profile') }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Username</label>
+                        <input type="text" class="form-control" value="{{ current_user.username }}" readonly disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Full Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ current_user.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email Address</label>
+                        <input type="email" name="email" class="form-control" value="{{ current_user.email or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">System Role</label>
+                        <input type="text" class="form-control" value="{{ current_user.role }}" readonly disabled>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold text-primary mb-3">Change Password</h6>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">New Password (leave blank to keep current)</label>
+                        <input type="password" name="new_password" class="form-control" placeholder="Minimum 6 characters">
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold"><i class="fa-solid fa-save me-1"></i> Update Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

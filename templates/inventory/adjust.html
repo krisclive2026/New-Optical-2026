@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Stock Adjustment - VisionCraft OSMS{% endblock %}
+{% block page_title %}Record Stock Adjustment / Inbound Receiving{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-boxes-packing me-2"></i> Inventory Quantity Update</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('inventory_adjust') }}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Item Category <span class="text-danger">*</span></label>
+                            <select name="item_type" id="inv-item-type" class="form-select" required onchange="toggleItemSelects()">
+                                <option value="Frame" {% if selected_type == 'Frame' or not selected_type %}selected{% endif %}>Optical Frame</option>
+                                <option value="Lens" {% if selected_type == 'Lens' %}selected{% endif %}>Optical Lens</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6" id="frame-select-container">
+                            <label class="form-label fw-semibold">Select Frame <span class="text-danger">*</span></label>
+                            <select name="frame_id" class="form-select" onchange="goToAddNew(this, '{{ url_for('frame_create') }}')">
+                                <option value="">-- Choose Frame Item --</option>
+                                <option value="__new__" class="fw-bold text-primary">+ Add a new frame (not in list)</option>
+                                {% for f in frames %}
+                                <option value="{{ f.id }}" {% if selected_id and selected_type == 'Frame' and selected_id == f.id %}selected{% endif %}>
+                                    {{ f.brand }} {{ f.model }} (Current Stock: {{ f.quantity }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 d-none" id="lens-select-container">
+                            <label class="form-label fw-semibold">Select Lens <span class="text-danger">*</span></label>
+                            <select name="lens_id" class="form-select" onchange="goToAddNew(this, '{{ url_for('lens_create') }}')">
+                                <option value="">-- Choose Lens Item --</option>
+                                <option value="__new__" class="fw-bold text-primary">+ Add a new lens (not in list)</option>
+                                {% for l in lenses %}
+                                <option value="{{ l.id }}" {% if selected_id and selected_type == 'Lens' and selected_id == l.id %}selected{% endif %}>
+                                    {{ l.brand }} {{ l.lens_type }} (Current Stock: {{ l.quantity }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Transaction Type <span class="text-danger">*</span></label>
+                            <select name="transaction_type" class="form-select" required>
+                                <option value="Stock In" selected>Stock In (Receiving supplier shipment)</option>
+                                <option value="Stock Out">Stock Out (Damaged / Return / Sample)</option>
+                                <option value="Adjustment">Adjustment (Physical inventory count correction)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Quantity to Add/Remove <span class="text-danger">*</span></label>
+                            <input type="number" min="1" name="quantity" class="form-control" value="1" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Reference Document / Supplier Invoice #</label>
+                            <input type="text" name="reference" class="form-control" placeholder="e.g. PO-99214">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Audit Notes / Reason</label>
+                            <textarea name="notes" class="form-control" rows="2" placeholder="e.g. Received new shipment batch from Luxottica"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{{ url_for('inventory_list') }}" class="btn btn-light px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="fa-solid fa-save me-1"></i> Submit Stock Update
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function goToAddNew(select, url) {
+    if (select.value === '__new__') { window.location.href = url; }
+}
+
+function toggleItemSelects() {
+    const itemType = document.getElementById('inv-item-type').value;
+    const frameContainer = document.getElementById('frame-select-container');
+    const lensContainer = document.getElementById('lens-select-container');
+
+    if (itemType === 'Frame') {
+        frameContainer.classList.remove('d-none');
+        lensContainer.classList.add('d-none');
+    } else {
+        frameContainer.classList.add('d-none');
+        lensContainer.classList.remove('d-none');
+    }
+}
+document.addEventListener('DOMContentLoaded', toggleItemSelects);
+</script>
+{% endblock %}

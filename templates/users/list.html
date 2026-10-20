@@ -1,0 +1,141 @@
+
+{% extends "base.html" %}
+{% block title %}User Management - VisionCraft OSMS{% endblock %}
+{% block page_title %}System Users & Roles{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fa-solid fa-user-shield me-2"></i>
+                    All Registered Accounts
+                </h6>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table custom-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Created Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td class="fw-bold text-primary">{{ u.username }}</td>
+                            <td>{{ u.name }}</td>
+
+                            <td>
+                                <span class="badge {% if u.role == 'Admin' %}text-bg-primary{% else %}text-bg-info text-white{% endif %}">
+                                    {{ u.role }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% if u.created_at %}
+                                    {{ u.created_at.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if u.id != current_user.id %}
+                                <form method="POST"
+                                      action="{{ url_for('user_delete', user_id=u.id) }}"
+                                      onsubmit="return confirm('Are you sure you want to delete the account for {{ u.username }}?');">
+
+                                    
+                                    <button type="submit"
+                                            class="btn btn-danger btn-sm">
+                                        <i class="fa-solid fa-trash me-1"></i>
+                                        Delete
+                                    </button>
+                                </form>
+                                {% else %}
+                                    <span class="text-muted small">Current account</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No user accounts found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fa-solid fa-user-plus me-2"></i>
+                    Create New User Account
+                </h6>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('user_create') }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Username <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="username" class="form-control"
+                               placeholder="e.g. john_optician" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Full Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="name" class="form-control"
+                               placeholder="e.g. John Doe" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <input type="password" name="password" class="form-control"
+                               placeholder="Set password" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            System Role <span class="text-danger">*</span>
+                        </label>
+                        <select name="role" class="form-select" required>
+                            <option value="Staff" selected>
+                                Staff (Customers, Orders, Billing, Inventory)
+                            </option>
+                            <option value="Admin">
+                                Admin (Full Access & Analytics)
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold">
+                            <i class="fa-solid fa-user-check me-1"></i>
+                            Register User Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Customer Profile - {{ customer.name }}{% endblock %}
+{% block page_title %}Customer Profile: {{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Left Column: Customer Personal Details Card -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body text-center p-4">
+                <div class="avatar-circle bg-primary text-white mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle fs-2 fw-bold" style="width: 72px; height: 72px;">
+                    {{ customer.name[0]|upper }}
+                </div>
+                <h5 class="fw-bold mb-1">{{ customer.name }}</h5>
+                <span class="badge text-bg-primary mb-3">{{ customer.customer_code }}</span>
+
+                <div class="text-start border-top pt-3 fs-7">
+                    <p class="mb-2"><i class="fa-solid fa-phone text-muted w-25"></i> <strong>Phone:</strong> {{ customer.phone }}</p>
+                    <p class="mb-2"><i class="fa-solid fa-envelope text-muted w-25"></i> <strong>Email:</strong> {{ customer.email or 'N/A' }}</p>
+                    <p class="mb-2"><i class="fa-solid fa-cake-candles text-muted w-25"></i> <strong>DOB:</strong> {{ customer.dob.strftime('%Y-%m-%d') if customer.dob else 'N/A' }}</p>
+                    <p class="mb-2"><i class="fa-solid fa-venus-mars text-muted w-25"></i> <strong>Gender:</strong> {{ customer.gender or 'N/A' }}</p>
+                    <p class="mb-2"><i class="fa-solid fa-location-dot text-muted w-25"></i> <strong>Address:</strong> {{ customer.address or 'N/A' }}</p>
+                    <p class="mb-0"><i class="fa-solid fa-calendar-check text-muted w-25"></i> <strong>Joined:</strong> {{ customer.created_at.strftime('%Y-%m-%d') }}</p>
+                </div>
+
+                {% if customer.notes %}
+                <div class="alert alert-light border text-start mt-3 mb-0 fs-7">
+                    <strong><i class="fa-solid fa-note-sticky text-warning me-1"></i> Customer Notes:</strong><br>
+                    {{ customer.notes }}
+                </div>
+                {% endif %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('customer_edit', customer_id=customer.id) }}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-pen-to-square me-1"></i> Edit Details</a>
+                    <a href="{{ url_for('prescription_create', customer_id=customer.id) }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-eye me-1"></i> Perform Eye Test / New Rx</a>
+                    <a href="{{ url_for('invoice_create_direct', customer_id=customer.id) }}" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i> Generate Bill</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Tabs for Rx, Orders, Payments -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white pb-0 border-bottom-0">
+                <ul class="nav nav-tabs card-header-tabs" id="customerTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active fw-bold" id="rx-tab" data-bs-toggle="tab" data-bs-target="#rx-pane" type="button"><i class="fa-solid fa-eye me-2"></i> Prescription History ({{ prescriptions|length }})</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices-pane" type="button"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Billing & Payments</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-4">
+                <div class="tab-content" id="customerTabsContent">
+
+                    <!-- Prescription History Pane -->
+                    <div class="tab-pane fade show active" id="rx-pane" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold m-0">Eye Test Prescriptions</h6>
+                            <a href="{{ url_for('prescription_create', customer_id=customer.id) }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-plus me-1"></i> New Prescription</a>
+                        </div>
+                        
+                        {% if prescriptions %}
+                            {% for rx in prescriptions %}
+                            <div class="border rounded-3 p-3 mb-3 bg-white shadow-xs">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <span class="fw-bold text-primary"><i class="fa-solid fa-calendar-day me-1"></i> {{ rx.prescription_date.strftime('%Y-%m-%d') }}</span>
+                                        <span class="text-muted ms-2 fs-7">Dr/Optometrist: {{ rx.doctor_name or 'Staff Optician' }}</span>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('prescription_view', rx_id=rx.id) }}" class="btn btn-outline-info" title="View Full Rx"><i class="fa-solid fa-eye"></i></a>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered prescription-table mb-2">
+                                        <thead>
+                                            <tr>
+                                                <th>Eye</th>
+                                                <th>SPH</th>
+                                                <th>CYL</th>
+                                                <th>AXIS</th>
+                                                <th>ADD</th>
+                                                <th>PD</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="eye-label">OD (Right)</td>
+                                                <td>{{ rx.spherical_od or '0.00' }}</td>
+                                                <td>{{ rx.cyl_od or '0.00' }}</td>
+                                                <td>{{ rx.axis_od or '0' }}°</td>
+                                                <td>{{ rx.add_od or '0.00' }}</td>
+                                                <td>{{ rx.pd or 'N/A' }} mm</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="eye-label">OS (Left)</td>
+                                                <td>{{ rx.spherical_os or '0.00' }}</td>
+                                                <td>{{ rx.cyl_os or '0.00' }}</td>
+                                                <td>{{ rx.axis_os or '0' }}°</td>
+                                                <td>{{ rx.add_os or '0.00' }}</td>
+                                                <td>{% if rx.near_pd %}Near: {{ rx.near_pd }} mm{% else %}-{% endif %}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% if rx.next_test_date %}
+                                <small class="text-muted"><i class="fa-solid fa-bell text-warning me-1"></i> Next Recommended Eye Test: <b>{{ rx.next_test_date.strftime('%Y-%m-%d') }}</b></small>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4 text-muted border rounded-3 bg-light">
+                                <i class="fa-solid fa-eye-slash fs-2 mb-2 d-block text-secondary"></i>
+                                No prescription records recorded for this customer.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Invoices Pane -->
+                    <div class="tab-pane fade" id="invoices-pane" role="tabpanel">
+                        <h6 class="fw-bold mb-3">Invoices & Financial Summary</h6>
+                        {% if invoices %}
+                        <div class="table-responsive">
+                            <table class="table custom-table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice #</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Balance</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for inv in invoices %}
+                                    <tr>
+                                        <td><a href="{{ url_for('invoice_view', invoice_id=inv.id) }}" class="fw-bold text-primary">{{ inv.invoice_number }}</a></td>
+                                        <td>{{ inv.invoice_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>₹{{ "%.2f"|format(inv.total_amount) }}</td>
+                                        <td>
+                                            <a href="{{ url_for('invoice_view', invoice_id=inv.id) }}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-pdf me-1"></i> Invoice</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4 text-muted border rounded-3 bg-light">
+                            No billing records found.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

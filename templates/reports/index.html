@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Reports & Analytics - VisionCraft OSMS{% endblock %}
+{% block page_title %}Analytics & Reports Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Reports Filter Control -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-filter me-2"></i> Report Filter Options</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="GET" action="{{ url_for('reports_index') }}">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Report Category</label>
+                            <select name="report_type" class="form-select">
+                                <option value="sales" {% if selected_report == 'sales' %}selected{% endif %}>Sales & Invoices Report</option>
+                                <option value="frame_stock" {% if selected_report == 'frame_stock' %}selected{% endif %}>Frame Stock Report</option>
+                                <option value="lens_stock" {% if selected_report == 'lens_stock' %}selected{% endif %}>Lens Stock Report</option>
+                                <option value="low_stock" {% if selected_report == 'low_stock' %}selected{% endif %}>Low Stock Inventory Alert</option>
+                                <option value="profit" {% if selected_report == 'profit' %}selected{% endif %}>Sales Profit Summary</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-rotate me-1"></i> Generate Report</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Actions & Data Table -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-table me-2"></i> {{ report_title }}</h6>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('report_export_excel', report_type=selected_report, start_date=start_date, end_date=end_date) }}" class="btn btn-sm btn-success fw-semibold" target="_blank">
+                        <i class="fa-solid fa-file-excel me-1"></i> Export to Excel
+                    </a>
+                    <a href="{{ url_for('report_export_pdf', report_type=selected_report, start_date=start_date, end_date=end_date) }}" class="btn btn-sm btn-danger fw-semibold" target="_blank">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Export to PDF
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table custom-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            {% for h in report_headers %}
+                            <th>{{ h }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if report_rows %}
+                            {% for row in report_rows %}
+                            <tr>
+                                {% for cell in row %}
+                                <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="{{ report_headers|length }}" class="text-center text-muted py-5">
+                                    No data records found for the selected filter criteria.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

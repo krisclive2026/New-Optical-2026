@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Bill {{ invoice.invoice_number }} - VisionCraft OSMS{% endblock %}
+{% block page_title %}Bill {{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+<div class="d-flex gap-2 mb-3 d-print-none">
+    <a href="{{ url_for('billing_list') }}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-arrow-left me-1"></i> All Bills</a>
+    <a href="{{ url_for('invoice_create_direct') }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i> New Bill</a>
+    <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id) }}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-file-pdf me-1"></i> PDF</a>
+    <button onclick="window.print()" class="btn btn-outline-dark btn-sm"><i class="fa-solid fa-print me-1"></i> Print</button>
+</div>
+
+<div class="card shadow-sm border-0 mx-auto" style="max-width:820px">
+    <div class="card-body p-4 p-md-5">
+        <div class="d-flex justify-content-between flex-wrap gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold text-primary mb-1">{{ config.STORE_NAME }}</h4>
+                <div class="text-muted small">{{ config.STORE_ADDRESS }}<br>{{ config.STORE_PHONE }} &middot; {{ config.STORE_EMAIL }}</div>
+            </div>
+            <div class="text-md-end">
+                <div class="fs-5 fw-bold">{{ invoice.invoice_number }}</div>
+                <div class="text-muted small">{{ invoice.invoice_date.strftime('%d %b %Y') }}</div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="text-muted small text-uppercase">Billed to</div>
+            <div class="fw-bold">{{ invoice.customer.name }}</div>
+            <div class="small text-muted">{{ invoice.customer.phone }}{% if invoice.customer.address %} &middot; {{ invoice.customer.address }}{% endif %}</div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light"><tr><th>#</th><th>Item</th><th class="text-center">Qty</th><th class="text-end">Price</th><th class="text-end">Amount</th></tr></thead>
+                <tbody>
+                    {% for it in items %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ it.description }}{% if it.type == 'Custom' %} <span class="badge bg-light text-secondary border">Extra</span>{% endif %}</td>
+                        <td class="text-center">{{ it.quantity }}</td>
+                        <td class="text-end">₹{{ "%.2f"|format(it.unit_price) }}</td>
+                        <td class="text-end fw-semibold">₹{{ "%.2f"|format(it.total) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="ms-auto" style="max-width:300px">
+            <div class="d-flex justify-content-between py-1"><span class="text-muted">Subtotal</span><span>₹{{ "%.2f"|format(items|sum(attribute='total')) }}</span></div>
+            {% if invoice.discount %}<div class="d-flex justify-content-between py-1"><span class="text-muted">Discount</span><span class="text-danger">- ₹{{ "%.2f"|format(invoice.discount) }}</span></div>{% endif %}
+            {% if invoice.tax_rate %}<div class="d-flex justify-content-between py-1"><span class="text-muted">Tax ({{ invoice.tax_rate }}%)</span><span>₹{{ "%.2f"|format(invoice.tax_amount) }}</span></div>{% endif %}
+            <div class="d-flex justify-content-between border-top mt-2 pt-2 fs-5 fw-bold"><span>Total</span><span>₹{{ "%.2f"|format(invoice.total_amount) }}</span></div>
+            {% if invoice.balance_amount > 0 %}
+            <div class="d-flex justify-content-between py-1 text-danger"><span>Balance due</span><span>₹{{ "%.2f"|format(invoice.balance_amount) }}</span></div>
+            {% endif %}
+        </div>
+        {% if invoice.notes %}<div class="mt-4 small"><span class="text-muted">Notes:</span> {{ invoice.notes }}</div>{% endif %}
+        <div class="text-center text-muted small mt-5">Thank you for shopping with us!</div>
+    </div>
+</div>
+{% endblock %}

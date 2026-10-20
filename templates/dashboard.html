@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - VisionCraft OSMS{% endblock %}
+{% block page_title %}Store Analytics & Dashboard{% endblock %}
+
+{% block content %}
+<!-- Metric Cards Grid -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="metric-label">Total Customers</span>
+                    <div class="metric-value">{{ total_customers }}</div>
+                </div>
+                <div class="icon-shape bg-primary text-white">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="metric-label">Today's Revenue</span>
+                    <div class="metric-value text-success">₹{{ "%.2f"|format(todays_sales) }}</div>
+                </div>
+                <div class="icon-shape bg-success text-white">
+                    <span class="fw-bold fs-5">₹</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card border-warning border-start border-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="metric-label">Low-Stock Items</span>
+                    <div class="metric-value text-warning">{{ low_stock_count }}</div>
+                    <small class="text-muted">Frames & Lenses below min threshold</small>
+                </div>
+                <div class="icon-shape bg-warning text-white">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card border-primary border-start border-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="metric-label">Total Inventory Items</span>
+                    <div class="metric-value">{{ total_products }}</div>
+                    <small class="text-muted">{{ total_frames }} Frames | {{ total_lenses }} Lenses</small>
+                </div>
+                <div class="icon-shape bg-secondary text-white">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6 col-md-12">
+        <div class="card h-100 shadow-sm border-0 bg-primary text-white">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="fa-solid fa-plus-circle me-2"></i> Quick Actions</h5>
+                    <p class="mb-0 text-white-50 fs-7">Create new customers or test prescriptions.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('customer_create') }}" class="btn btn-light btn-sm fw-semibold"><i class="fa-solid fa-user-plus me-1"></i> Add Customer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-chart-area me-2"></i> Sales Trend (Last 7 Days)</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="salesChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Tables Section -->
+<div class="row g-3">
+    <!-- Recent Sales / Invoices -->
+    <div class="col-lg-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-receipt me-2"></i> Recent Invoices</h6>
+                <a href="{{ url_for('billing_list') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table custom-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Bill #</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_invoices %}
+                            {% for inv in recent_invoices %}
+                            <tr>
+                                <td><a href="{{ url_for('invoice_view', invoice_id=inv.id) }}" class="fw-bold text-primary">{{ inv.invoice_number }}</a></td>
+                                <td>{{ inv.customer.name }}</td>
+                                <td>₹{{ "%.2f"|format(inv.total_amount) }}</td>
+                                <td>{{ inv.invoice_date.strftime('%d %b') }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No recent invoices found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize Dashboard Charts
+    const salesLabels = {{ sales_dates|tojson }};
+    const salesData = {{ sales_values|tojson }};
+
+    const ctxSales = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctxSales, {
+        type: 'line',
+        data: {
+            labels: salesLabels,
+            datasets: [{
+                label: 'Daily Sales (₹)',
+                data: salesData,
+                borderColor: '#0f4c81',
+                backgroundColor: 'rgba(15, 76, 129, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#0284c7'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}

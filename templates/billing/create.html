@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Issue Invoice - Order #{{ order.order_number }}{% endblock %}
+{% block page_title %}Generate Invoice for Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('invoice_create', order_id=order.id) }}">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-receipt me-2"></i> Invoice Details & Charges Breakdown</h6>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Customer & Order Summary -->
+                    <div class="row bg-light p-3 rounded-3 border mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-1 fs-7 text-muted">CUSTOMER</p>
+                            <h6 class="fw-bold mb-0 text-primary">{{ order.customer.name }} ({{ order.customer.phone }})</h6>
+                        </div>
+                        <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                            <p class="mb-1 fs-7 text-muted">ORDER NUMBER</p>
+                            <h6 class="fw-bold mb-0 text-dark">{{ order.order_number }}</h6>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Frame Charges (₹)</label>
+                            <input type="number" step="0.01" min="0" name="frame_amount" id="inv-frame-amount" class="form-control" value="{{ frame_amount }}" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Lens Charges (₹)</label>
+                            <input type="number" step="0.01" min="0" name="lens_amount" id="inv-lens-amount" class="form-control" value="{{ lens_amount }}" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Other Fitting / Service Charges (₹)</label>
+                            <input type="number" step="0.01" min="0" name="other_charges" id="order-other-charges" class="form-control" value="0.00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Discount (₹)</label>
+                            <input type="number" step="0.01" min="0" name="discount" id="order-discount" class="form-control" value="{{ order.discount }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Tax Rate (%)</label>
+                            <input type="number" step="0.1" min="0" max="100" name="tax_rate" id="invoice-tax-rate" class="form-control" value="0.0">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Initial Payment Received (₹)</label>
+                            <input type="number" step="0.01" min="0" name="paid_amount" id="order-advance" class="form-control" value="{{ order.advance_payment }}">
+                            <small class="text-muted">Defaults to order advance payment</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Payment Method</label>
+                            <select name="payment_method" class="form-select">
+                                <option value="Cash" selected>Cash</option>
+                                <option value="UPI">UPI / Digital Wallet</option>
+                                <option value="Card">Credit / Debit Card</option>
+                                <option value="Other">Other Transfer</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Invoice Remarks</label>
+                            <textarea name="notes" class="form-control" rows="2" placeholder="e.g. Full payment on delivery expected"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Calculated Totals Display -->
+                    <div class="row mt-4 pt-3 border-top align-items-center">
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted fs-7">Calculated Grand Total:</p>
+                            <h4 id="display-total" class="fw-bold text-primary mb-0">₹{{ "%.2f"|format(order.total_amount) }}</h4>
+                            <small class="text-danger">Balance Due: <span id="display-balance" class="fw-bold">₹{{ "%.2f"|format(order.balance_amount) }}</span></small>
+                        </div>
+                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                            <a href="{{ url_for('orders_list') }}" class="btn btn-light me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="fa-solid fa-receipt me-1"></i> Confirm & Generate Invoice
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

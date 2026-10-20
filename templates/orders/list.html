@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Optical Orders - VisionCraft OSMS{% endblock %}
+{% block page_title %}Optical Order Management{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-cart-shopping me-2"></i> All Optical Orders</h6>
+        
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- Status Filter -->
+            <select class="form-select form-select-sm" style="width: 160px;" onchange="location = this.value;">
+                <option value="{{ url_for('orders_list') }}">All Order Statuses</option>
+                <option value="{{ url_for('orders_list', status='New') }}" {% if selected_status == 'New' %}selected{% endif %}>New</option>
+                <option value="{{ url_for('orders_list', status='Processing') }}" {% if selected_status == 'Processing' %}selected{% endif %}>Processing</option>
+                <option value="{{ url_for('orders_list', status='Lens Ordered') }}" {% if selected_status == 'Lens Ordered' %}selected{% endif %}>Lens Ordered</option>
+                <option value="{{ url_for('orders_list', status='Ready') }}" {% if selected_status == 'Ready' %}selected{% endif %}>Ready</option>
+                <option value="{{ url_for('orders_list', status='Delivered') }}" {% if selected_status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                <option value="{{ url_for('orders_list', status='Cancelled') }}" {% if selected_status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+
+            <div class="input-group input-group-sm" style="width: 220px;">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control table-search-input" data-target="ordersTable" placeholder="Search order # or customer...">
+            </div>
+            
+            <a href="{{ url_for('order_create') }}" class="btn btn-primary btn-sm fw-semibold">
+                <i class="fa-solid fa-cart-plus me-1"></i> Create Order
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0" id="ordersTable">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Frame & Lens</th>
+                    <th>Order Date</th>
+                    <th>Expected Delivery</th>
+                    <th>Total (₹)</th>
+                    <th>Balance (₹)</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if orders %}
+                    {% for ord in orders %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('invoice_view', invoice_id=ord.invoice.id) if ord.invoice else url_for('invoice_create', order_id=ord.id) }}" class="fw-bold text-primary">
+                                {{ ord.order_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('customer_view', customer_id=ord.customer.id) }}" class="fw-semibold text-dark text-decoration-none">
+                                {{ ord.customer.name }}
+                            </a>
+                            <small class="d-block text-muted">{{ ord.customer.phone }}</small>
+                        </td>
+                        <td>
+                            <small class="d-block fw-semibold">{{ ord.frame.brand if ord.frame else 'Custom Frame' }} {{ ord.frame.model if ord.frame else '' }}</small>
+                            <small class="text-muted">{{ ord.lens.brand if ord.lens else 'Custom Lens' }} ({{ ord.lens.lens_type if ord.lens else '' }})</small>
+                        </td>
+                        <td>{{ ord.order_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ ord.expected_delivery_date.strftime('%Y-%m-%d') if ord.expected_delivery_date else 'N/A' }}</td>
+                        <td class="fw-bold">₹{{ "%.2f"|format(ord.total_amount) }}</td>
+                        <td class="fw-bold {% if ord.balance_amount > 0 %}text-danger{% else %}text-success{% endif %}">
+                            ₹{{ "%.2f"|format(ord.balance_amount) }}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('order_update_status', order_id=ord.id) }}" class="d-inline-block">
+                                <select name="status" class="form-select form-select-sm fw-bold border" style="width: 135px;" onchange="this.form.submit()" title="Change Order Status">
+                                    <option value="New" {% if ord.status == 'New' %}selected{% endif %}>New</option>
+                                    <option value="Processing" {% if ord.status == 'Processing' %}selected{% endif %}>Processing</option>
+                                    <option value="Lens Ordered" {% if ord.status == 'Lens Ordered' %}selected{% endif %}>Lens Ordered</option>
+                                    <option value="Ready" {% if ord.status == 'Ready' %}selected{% endif %}>Ready</option>
+                                    <option value="Delivered" {% if ord.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                                    <option value="Cancelled" {% if ord.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td class="text-end">
+                            {% if ord.invoice %}
+                            <a href="{{ url_for('invoice_view', invoice_id=ord.invoice.id) }}" class="btn btn-sm btn-outline-primary fw-semibold" title="View Invoice">
+                                <i class="fa-solid fa-file-invoice me-1"></i> Invoice
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('invoice_create', order_id=ord.id) }}" class="btn btn-sm btn-outline-success fw-semibold" title="Issue Invoice">
+                                <i class="fa-solid fa-receipt me-1"></i> Issue Invoice
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-cart-arrow-down fs-1 text-muted mb-3 d-block"></i>
+                            No optical orders found.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

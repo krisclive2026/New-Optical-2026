@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Order Details - {{ order.order_number }}{% endblock %}
+{% block page_title %}Optical Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Order Header & Status Progression Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-cart-shopping me-2"></i> Order Status & Progress</h6>
+                <span class="badge badge-status badge-{{ order.status|lower|replace(' ', '-') }} fs-6">{{ order.status }}</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row align-items-center mb-4 text-center">
+                    <div class="col-2">
+                        <div class="p-2 rounded-circle border {% if order.status in ['New', 'Processing', 'Lens Ordered', 'Ready', 'Delivered'] %}bg-primary text-white{% else %}bg-light text-muted{% endif %} mx-auto" style="width: 45px; height: 45px; line-height: 28px;">
+                            <i class="fa-solid fa-file-signature"></i>
+                        </div>
+                        <small class="d-block mt-1 fw-semibold">New</small>
+                    </div>
+                    <div class="col-2">
+                        <div class="p-2 rounded-circle border {% if order.status in ['Processing', 'Lens Ordered', 'Ready', 'Delivered'] %}bg-primary text-white{% else %}bg-light text-muted{% endif %} mx-auto" style="width: 45px; height: 45px; line-height: 28px;">
+                            <i class="fa-solid fa-gears"></i>
+                        </div>
+                        <small class="d-block mt-1 fw-semibold">Processing</small>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded-circle border {% if order.status in ['Lens Ordered', 'Ready', 'Delivered'] %}bg-primary text-white{% else %}bg-light text-muted{% endif %} mx-auto" style="width: 45px; height: 45px; line-height: 28px;">
+                            <i class="fa-solid fa-glasses"></i>
+                        </div>
+                        <small class="d-block mt-1 fw-semibold">Lens Ordered</small>
+                    </div>
+                    <div class="col-2">
+                        <div class="p-2 rounded-circle border {% if order.status in ['Ready', 'Delivered'] %}bg-primary text-white{% else %}bg-light text-muted{% endif %} mx-auto" style="width: 45px; height: 45px; line-height: 28px;">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <small class="d-block mt-1 fw-semibold">Ready</small>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded-circle border {% if order.status == 'Delivered' %}bg-success text-white{% else %}bg-light text-muted{% endif %} mx-auto" style="width: 45px; height: 45px; line-height: 28px;">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <small class="d-block mt-1 fw-semibold">Delivered</small>
+                    </div>
+                </div>
+
+                <!-- Update Status Form -->
+                <form method="POST" action="{{ url_for('order_update_status', order_id=order.id) }}" class="p-3 bg-light rounded-3 border">
+                    <label class="form-label fw-semibold fs-7 mb-2">Update Workflow Status:</label>
+                    <div class="input-group">
+                        <select name="status" class="form-select">
+                            <option value="New" {% if order.status == 'New' %}selected{% endif %}>New</option>
+                            <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                            <option value="Lens Ordered" {% if order.status == 'Lens Ordered' %}selected{% endif %}>Lens Ordered</option>
+                            <option value="Ready" {% if order.status == 'Ready' %}selected{% endif %}>Ready for Collection</option>
+                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered to Customer</option>
+                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary fw-semibold"><i class="fa-solid fa-rotate me-1"></i> Update Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Order Items Detail -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-list-check me-2"></i> Selected Optical Items & Prescription</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-glasses me-1"></i> Frame Details</h6>
+                            {% if order.frame %}
+                            <p class="mb-1 fw-bold">{{ order.frame.brand }} - {{ order.frame.model }}</p>
+                            <p class="mb-1 fs-7 text-muted">Code: {{ order.frame.frame_code }} | Type: {{ order.frame.frame_type }}</p>
+                            <p class="mb-0 fs-7 text-muted">Price: ₹{{ "%.2f"|format(order.frame.selling_price) }}</p>
+                            {% else %}
+                            <p class="text-muted mb-0 fs-7">No frame selected (Customer supplied frame).</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-circle-dot me-1"></i> Lens Details</h6>
+                            {% if order.lens %}
+                            <p class="mb-1 fw-bold">{{ order.lens.brand }} - {{ order.lens.lens_type }}</p>
+                            <p class="mb-1 fs-7 text-muted">Index: {{ order.lens.index_val or '1.56' }} | Coating: {{ order.lens.coating or 'Standard' }}</p>
+                            <p class="mb-0 fs-7 text-muted">Price: ₹{{ "%.2f"|format(order.lens.selling_price) }} x {{ order.quantity }} pair</p>
+                            {% else %}
+                            <p class="text-muted mb-0 fs-7">No lens selected (Frame only purchase).</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if order.lens_details %}
+                <div class="alert alert-info border mb-3 fs-7">
+                    <strong><i class="fa-solid fa-microscope me-1"></i> Lab Fitting Notes:</strong><br>
+                    {{ order.lens_details }}
+                </div>
+                {% endif %}
+
+                {% if order.prescription %}
+                <h6 class="fw-bold text-dark mb-2">Prescription Used</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered text-center fs-7">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Eye</th>
+                                <th>SPH</th>
+                                <th>CYL</th>
+                                <th>AXIS</th>
+                                <th>ADD</th>
+                                <th>PD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>OD</td>
+                                <td>{{ order.prescription.spherical_od }}</td>
+                                <td>{{ order.prescription.cyl_od }}</td>
+                                <td>{{ order.prescription.axis_od }}°</td>
+                                <td>{{ order.prescription.add_od }}</td>
+                                <td>{{ order.prescription.pd }}</td>
+                            </tr>
+                            <tr>
+                                <td>OS</td>
+                                <td>{{ order.prescription.spherical_os }}</td>
+                                <td>{{ order.prescription.cyl_os }}</td>
+                                <td>{{ order.prescription.axis_os }}°</td>
+                                <td>{{ order.prescription.add_os }}</td>
+                                <td>{{ order.prescription.near_pd }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Customer Info & Financials -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-user me-2"></i> Customer Details</h6>
+            </div>
+            <div class="card-body p-4 fs-7">
+                <h6 class="fw-bold text-dark mb-1">{{ order.customer.name }}</h6>
+                <p class="mb-2 text-muted"><i class="fa-solid fa-phone me-1"></i> {{ order.customer.phone }}</p>
+                <p class="mb-2 text-muted"><i class="fa-solid fa-envelope me-1"></i> {{ order.customer.email or 'N/A' }}</p>
+                <a href="{{ url_for('customer_view', customer_id=order.customer.id) }}" class="btn btn-sm btn-outline-primary w-100 mt-2">View Customer Profile</a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><span class="fw-bold me-2">₹</span>Financial Summary</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Total Amount:</span>
+                    <span class="fw-bold">₹{{ "%.2f"|format(order.total_amount) }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Discount Applied:</span>
+                    <span class="text-success">-₹{{ "%.2f"|format(order.discount) }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Advance Paid:</span>
+                    <span class="text-success">₹{{ "%.2f"|format(order.advance_payment) }}</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fw-bold text-danger">Balance Due:</span>
+                    <span class="fw-bold text-danger fs-5">₹{{ "%.2f"|format(order.balance_amount) }}</span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    {% if order.invoice %}
+                    <a href="{{ url_for('invoice_view', invoice_id=order.invoice.id) }}" class="btn btn-primary fw-semibold">
+                        <i class="fa-solid fa-file-invoice me-1"></i> View / Print Invoice
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('invoice_create', order_id=order.id) }}" class="btn btn-success fw-semibold">
+                        <i class="fa-solid fa-receipt me-1"></i> Issue Invoice
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

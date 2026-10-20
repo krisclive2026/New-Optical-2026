@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Customers - VisionCraft OSMS{% endblock %}
+{% block page_title %}Customer Management{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-users me-2"></i> All Registered Customers</h6>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm" style="width: 250px;">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control table-search-input" data-target="customersTable" placeholder="Search name or phone...">
+            </div>
+            <a href="{{ url_for('customer_create') }}" class="btn btn-primary btn-sm fw-semibold">
+                <i class="fa-solid fa-user-plus me-1"></i> Add Customer
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0" id="customersTable">
+            <thead>
+                <tr>
+                    <th>Customer Code</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Gender</th>
+                    <th>Created Date</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if customers %}
+                    {% for cust in customers %}
+                    <tr>
+                        <td><a href="{{ url_for('customer_view', customer_id=cust.id) }}" class="fw-bold text-primary">{{ cust.customer_code }}</a></td>
+                        <td class="fw-semibold">{{ cust.name }}</td>
+                        <td><i class="fa-solid fa-phone text-muted me-1 fs-7"></i> {{ cust.phone }}</td>
+                        <td>{{ cust.email or 'N/A' }}</td>
+                        <td><span class="badge text-bg-light border">{{ cust.gender or 'N/A' }}</span></td>
+                        <td>{{ cust.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('customer_view', customer_id=cust.id) }}" class="btn btn-outline-info" title="View Profile"><i class="fa-solid fa-eye"></i></a>
+                                <a href="{{ url_for('customer_edit', customer_id=cust.id) }}" class="btn btn-outline-secondary" title="Edit Customer"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <form method="POST" action="{{ url_for('customer_delete', customer_id=cust.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-delete-confirm" data-message="Are you sure you want to delete customer {{ cust.name }}? This will delete associated prescriptions as well." title="Delete Customer"><i class="fa-solid fa-trash-can"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-user-slash fs-1 text-muted mb-3 d-block"></i>
+                            No customers found. Click <b>Add Customer</b> to register a new customer.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

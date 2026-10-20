@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Generate Bill - VisionCraft OSMS{% endblock %}
+{% block page_title %}Generate Bill{% endblock %}
+
+{% block content %}
+<form method="POST" id="bill-form" autocomplete="off">
+<input type="hidden" name="items_json" id="items-json">
+<div class="row g-3">
+
+    <!-- LEFT: customer + products + extra item -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-body">
+                <label class="form-label fw-semibold">Customer</label>
+                <div class="input-group">
+                    <select name="customer_id" class="form-select" required>
+                        <option value="">Select customer...</option>
+                        {% for c in customers %}
+                        <option value="{{ c.id }}" {% if c.id == selected_customer_id %}selected{% endif %}>{{ c.name }} - {{ c.phone }}</option>
+                        {% endfor %}
+                    </select>
+                    <a href="{{ url_for('customer_create') }}" class="btn btn-outline-primary"><i class="fa-solid fa-user-plus"></i> New</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-header bg-white d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary"><i class="fa-solid fa-store me-2"></i> Products in Stock</h6>
+                <div class="d-flex gap-2">
+                    <select id="p-type" class="form-select form-select-sm" style="width:110px">
+                        <option value="">All</option><option>Frame</option><option>Lens</option>
+                    </select>
+                    <input type="text" id="p-search" class="form-control form-control-sm" style="width:190px" placeholder="Search product...">
+                </div>
+            </div>
+            <div class="list-group list-group-flush" id="product-list" style="max-height:340px;overflow-y:auto"></div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white"><h6 class="m-0 fw-bold text-primary"><i class="fa-solid fa-pen me-2"></i> Add Extra Item (type your own)</h6></div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-6"><label class="form-label small">Item name</label><input type="text" id="x-name" class="form-control" placeholder="e.g. Repair, Cleaning kit, Eye test fee"></div>
+                    <div class="col-4 col-md-2"><label class="form-label small">Qty</label><input type="number" id="x-qty" class="form-control" min="1" value="1"></div>
+                    <div class="col-8 col-md-2"><label class="form-label small">Price (₹)</label><input type="number" id="x-price" class="form-control" min="0" step="0.01"></div>
+                    <div class="col-12 col-md-2"><button type="button" id="x-add" class="btn btn-outline-primary w-100"><i class="fa-solid fa-plus"></i> Add</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: the bill -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 position-sticky" style="top:80px">
+            <div class="card-header bg-primary text-white"><h6 class="m-0 fw-bold"><i class="fa-solid fa-receipt me-2"></i> Current Bill</h6></div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light"><tr><th>Item</th><th style="width:78px">Qty</th><th class="text-end">Amount</th><th></th></tr></thead>
+                    <tbody id="cart-body"></tbody>
+                </table>
+            </div>
+            <div class="card-body border-top">
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><label class="form-label small mb-1">Discount (₹)</label><input type="number" name="discount" id="discount" class="form-control form-control-sm" min="0" step="0.01" value="0"></div>
+                    <div class="col-6"><label class="form-label small mb-1">Tax (%)</label><input type="number" name="tax_rate" id="tax" class="form-control form-control-sm" min="0" step="0.01" value="0"></div>
+                    <div class="col-6"><label class="form-label small mb-1">Paid by</label>
+                        <select name="payment_method" class="form-select form-select-sm"><option>Cash</option><option>Card</option><option>UPI</option><option>Bank Transfer</option></select></div>
+                    <div class="col-6"><label class="form-label small mb-1">Notes</label><input type="text" name="notes" class="form-control form-control-sm" maxlength="200"></div>
+                </div>
+                <div class="d-flex justify-content-between small text-muted"><span>Subtotal</span><span id="t-sub">₹0.00</span></div>
+                <div class="d-flex justify-content-between small text-muted"><span>Discount</span><span id="t-disc">- ₹0.00</span></div>
+                <div class="d-flex justify-content-between small text-muted"><span>Tax</span><span id="t-tax">₹0.00</span></div>
+                <div class="d-flex justify-content-between fs-4 fw-bold border-top mt-2 pt-2"><span>Total</span><span id="t-total">₹0.00</span></div>
+                <button type="submit" class="btn btn-success w-100 mt-3 fw-semibold"><i class="fa-solid fa-file-invoice me-1"></i> Generate Bill</button>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const PRODUCTS = {{ products|tojson }};
+let cart = [];
+const $ = id => document.getElementById(id);
+const money = n => '₹' + n.toFixed(2);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function renderProducts() {
+    const q = $('p-search').value.toLowerCase(), t = $('p-type').value;
+    const rows = PRODUCTS.filter(p => (!t || p.type === t) && (p.name + ' ' + p.sub).toLowerCase().includes(q));
+    $('product-list').innerHTML = rows.map(p => `
+        <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-key="${p.type}-${p.id}">
+            <span><span class="badge bg-light text-secondary border me-2">${p.type}</span><b>${esc(p.name)}</b><small class="text-muted d-block">${esc(p.sub)} &middot; ${p.stock} in stock</small></span>
+            <span class="fw-bold text-primary">${money(p.price)} <i class="fa-solid fa-circle-plus ms-2"></i></span>
+        </button>`).join('') || '<div class="p-4 text-center text-muted">No products found.</div>';
+}
+
+function addProduct(key) {
+    const p = PRODUCTS.find(x => `${x.type}-${x.id}` === key);
+    const line = cart.find(l => l.key === key);
+    if (line) { if (line.qty < p.stock) line.qty++; else alert('Only ' + p.stock + ' in stock.'); }
+    else cart.push({key, type: p.type, id: p.id, name: p.name, price: p.price, qty: 1, max: p.stock});
+    renderCart();
+}
+
+function renderCart() {
+    $('cart-body').innerHTML = cart.map((l, i) => `
+        <tr>
+            <td>${esc(l.name)}${l.type === 'Custom' ? ' <span class="badge bg-light text-secondary border">Extra</span>' : ''}<small class="d-block text-muted">${money(l.price)} each</small></td>
+            <td><input type="number" class="form-control form-control-sm" min="1" ${l.max ? 'max="' + l.max + '"' : ''} value="${l.qty}" data-i="${i}"></td>
+            <td class="text-end fw-semibold">${money(l.price * l.qty)}</td>
+            <td><button type="button" class="btn btn-sm text-danger" data-del="${i}"><i class="fa-solid fa-xmark"></i></button></td>
+        </tr>`).join('') || '<tr><td colspan="4" class="text-center text-muted py-4">No items yet. Pick a product or type an extra item.</td></tr>';
+    totals();
+}
+
+function totals() {
+    const sub = cart.reduce((s, l) => s + l.price * l.qty, 0);
+    const disc = Math.min(Math.max(parseFloat($('discount').value) || 0, 0), sub);
+    const tax = Math.max(parseFloat($('tax').value) || 0, 0) / 100 * (sub - disc);
+    $('t-sub').textContent = money(sub); $('t-disc').textContent = '- ' + money(disc);
+    $('t-tax').textContent = money(tax); $('t-total').textContent = money(sub - disc + tax);
+}
+
+$('product-list').addEventListener('click', e => { const b = e.target.closest('[data-key]'); if (b) addProduct(b.dataset.key); });
+$('p-search').addEventListener('input', renderProducts);
+$('p-type').addEventListener('change', renderProducts);
+$('discount').addEventListener('input', totals);
+$('tax').addEventListener('input', totals);
+$('cart-body').addEventListener('input', e => {
+    const i = e.target.dataset.i; if (i === undefined) return;
+    let v = Math.max(parseInt(e.target.value) || 1, 1); if (cart[i].max) v = Math.min(v, cart[i].max);
+    cart[i].qty = v; totals();
+    e.target.closest('tr').children[2].textContent = money(cart[i].price * v);
+});
+$('cart-body').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (b) { cart.splice(b.dataset.del, 1); renderCart(); } });
+
+$('x-add').addEventListener('click', () => {
+    const name = $('x-name').value.trim(), price = parseFloat($('x-price').value), qty = Math.max(parseInt($('x-qty').value) || 1, 1);
+    if (!name || isNaN(price) || price < 0) { alert('Type the item name and a valid price.'); return; }
+    cart.push({key: 'x' + Date.now(), type: 'Custom', name, price, qty});
+    $('x-name').value = ''; $('x-price').value = ''; $('x-qty').value = 1; renderCart(); $('x-name').focus();
+});
+
+$('bill-form').addEventListener('submit', e => {
+    if (!cart.length) { e.preventDefault(); alert('Add at least one item to the bill.'); return; }
+    $('items-json').value = JSON.stringify(cart.map(l => ({type: l.type, id: l.id, name: l.name, price: l.price, qty: l.qty})));
+});
+
+renderProducts(); renderCart();
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{% if customer %}Edit Customer{% else %}Add Customer{% endif %} - VisionCraft OSMS{% endblock %}
+{% block page_title %}{% if customer %}Edit Customer Record{% else %}New Customer Registration{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fa-solid {% if customer %}fa-user-pen{% else %}fa-user-plus{% endif %} me-2"></i>
+                    {% if customer %}Customer Details: {{ customer.name }}{% else %}Enter Customer Details{% endif %}
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{% if customer %}{{ url_for('customer_edit', customer_id=customer.id) }}{% else %}{{ url_for('customer_create') }}{% endif %}">
+                    <div class="row g-3">
+                        <!-- change1 -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" value="{{ customer.name if customer else '' }}" required placeholder="e.g. John Doe">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" name="phone" class="form-control" value="{{ customer.phone if customer else '' }}" required placeholder="e.g. +1 (555) 234-5678" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" minlength="10">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <input type="email" name="email" class="form-control" value="{{ customer.email if customer else '' }}" placeholder="john@example.com">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Date of Birth</label>
+                            <input type="date" name="dob" class="form-control" value="{{ customer.dob.strftime('%Y-%m-%d') if (customer and customer.dob) else '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="Unspecified" {% if not customer or customer.gender == 'Unspecified' %}selected{% endif %}>Select...</option>
+                                <option value="Male" {% if customer and customer.gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if customer and customer.gender == 'Female' %}selected{% endif %}>Female</option>
+                                <option value="Other" {% if customer and customer.gender == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Residential Address</label>
+                            <textarea name="address" class="form-control" rows="2" placeholder="Street, City, Zip Code">{{ customer.address if customer else '' }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Customer Notes / Medical History</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Any frame preferences, allergies, eye history, or special notes">{{ customer.notes if customer else '' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{{ url_for('customers_list') }}" class="btn btn-light px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="fa-solid fa-save me-1"></i> Save Customer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

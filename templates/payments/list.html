@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Payments Log - VisionCraft OSMS{% endblock %}
+{% block page_title %}Payment Transaction History{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-wallet me-2"></i> All Completed & Partial Payment Receipts</h6>
+        
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('payments_pending') }}" class="btn btn-warning btn-sm fw-semibold">
+                <i class="fa-solid fa-clock text-dark me-1"></i> View Pending Payments
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Payment Date</th>
+                    <th>Invoice #</th>
+                    <th>Customer Name</th>
+                    <th>Method</th>
+                    <th>Amount Received ($)</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if payments %}
+                    {% for pmt in payments %}
+                    <tr>
+                        <td class="fw-bold text-primary">#PMT-{{ pmt.id }}</td>
+                        <td>{{ pmt.payment_date.strftime('%Y-%m-%d') }}</td>
+                        <td><a href="{{ url_for('invoice_view', invoice_id=pmt.invoice.id) }}" class="fw-bold text-secondary">{{ pmt.invoice.invoice_number }}</a></td>
+                        <td>
+                            <a href="{{ url_for('customer_view', customer_id=pmt.customer.id) }}" class="fw-semibold text-dark text-decoration-none">
+                                {{ pmt.customer.name }}
+                            </a>
+                        </td>
+                        <td><span class="badge text-bg-light border">{{ pmt.payment_method }}</span></td>
+                        <td class="fw-bold text-success">${{ "%.2f"|format(pmt.amount_paid) }}</td>
+                        <td><small class="text-muted">{{ pmt.notes or 'Payment recorded' }}</small></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-wallet fs-1 text-muted mb-3 d-block"></i>
+                            No payment transactions recorded yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

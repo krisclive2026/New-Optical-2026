@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Lens Inventory - VisionCraft OSMS{% endblock %}
+{% block page_title %}Optical Lens Catalogue{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-circle-dot me-2"></i> Lens Inventory & Types</h6>
+        
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- Lens Type Filter -->
+            <select class="form-select form-select-sm" style="width: 170px;" onchange="location = this.value;">
+                <option value="{{ url_for('lenses_list') }}">All Lens Types</option>
+                <option value="{{ url_for('lenses_list', lens_type='Single Vision') }}" {% if selected_type == 'Single Vision' %}selected{% endif %}>Single Vision</option>
+                <option value="{{ url_for('lenses_list', lens_type='Bifocal') }}" {% if selected_type == 'Bifocal' %}selected{% endif %}>Bifocal</option>
+                <option value="{{ url_for('lenses_list', lens_type='Progressive') }}" {% if selected_type == 'Progressive' %}selected{% endif %}>Progressive</option>
+                <option value="{{ url_for('lenses_list', lens_type='Blue Cut') }}" {% if selected_type == 'Blue Cut' %}selected{% endif %}>Blue Cut</option>
+                <option value="{{ url_for('lenses_list', lens_type='Photochromic') }}" {% if selected_type == 'Photochromic' %}selected{% endif %}>Photochromic</option>
+            </select>
+
+             <!-- Supplier Dropdown -->
+            <select class="form-select form-select-sm"
+            style="width: 170px;"
+            onchange="location.href=this.value;">
+
+            <option value="{{ url_for('lenses_list', lens_type=selected_type) }}"
+            {% if not selected_supplier %}selected{% endif %}>
+            All Suppliers
+            </option>
+
+                {% for supplier in suppliers %}
+            <option
+                value="{{ url_for('lenses_list', lens_type=selected_type, supplier_name=supplier.name) }}"
+                {% if selected_supplier == supplier.name %}selected{% endif %}>
+                {{ supplier.name }}
+            </option>
+                {% endfor %}
+
+            </select>
+
+            <div class="input-group input-group-sm" style="width: 220px;">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control table-search-input" data-target="lensesTable" placeholder="Search brand/type...">
+            </div>
+            
+            <a href="{{ url_for('lens_create') }}" class="btn btn-primary btn-sm fw-semibold">
+                <i class="fa-solid fa-plus me-1"></i> Add Lens
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0" id="lensesTable">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Brand</th>
+                    <th>Type</th>
+                    <th>Index & Coating</th>
+                    <th>Selling Price</th>
+                    <th>Stock Qty</th>
+                    <th>Supplier</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if lenses %}
+                    {% for lens in lenses %}
+                    <tr class="{% if lens.is_low_stock %}table-warning{% endif %}">
+                        <td class="fw-bold text-primary">{{ lens.lens_code }}</td>
+                        <td class="fw-semibold">{{ lens.brand }}</td>
+                        <td><span class="badge text-bg-info text-white">{{ lens.lens_type }}</span></td>
+                        <td>
+                            <small class="d-block fw-semibold">Index: {{ lens.index_val or '1.56' }} | {{ lens.material or '' }}</small>
+                            <small class="text-muted">{{ lens.coating or 'Standard' }}</small>
+                        </td>
+                        <td class="fw-bold text-success">₹{{ "%.2f"|format(lens.selling_price) }}</td>
+                        <td>
+                            <span class="fw-bold fs-6 {% if lens.is_low_stock %}text-danger{% else %}text-dark{% endif %}">
+                                {{ lens.quantity }}
+                            </span>
+                            {% if lens.is_low_stock %}
+                            <small class="badge text-bg-danger d-block mt-1">Low Stock</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ lens.supplier_id or 'N/A' }}</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('lens_edit', lens_id=lens.id) }}" class="btn btn-outline-secondary" title="Edit Lens"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <form method="POST" action="{{ url_for('lens_delete', lens_id=lens.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-delete-confirm" data-message="Delete lens {{ lens.brand }}?" title="Delete Lens"><i class="fa-solid fa-trash-can"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-circle-dot fs-1 text-muted mb-3 d-block"></i>
+                            No optical lenses found.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

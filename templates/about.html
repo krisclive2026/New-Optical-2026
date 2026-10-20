@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}About - VisionCraft OSMS{% endblock %}
+{% block page_title %}About{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <i class="fa-solid fa-glasses fa-3x text-primary mb-3"></i>
+                    <h4 class="fw-bold text-primary mb-1">{{ app_name }}</h4>
+                    <div class="text-muted">{{ app_tagline }}</div>
+                    <div class="fw-semibold mt-3">by {{ developer_name }}</div>
+                    <div class="text-muted">Contact: {{ developer_contact }}</div>
+                </div>
+
+                <hr>
+
+                <h6 class="fw-bold text-primary"><i class="fa-solid fa-circle-info me-2"></i>About this system</h6>
+                <p class="text-muted mb-4">
+                    VisionCraft OSMS is a complete optical store management system covering customers,
+                    eye test prescriptions, frame and lens inventory, billing, suppliers and reports —
+                    built to run entirely on your own computer, with no external services required.
+                </p>
+
+                <div class="row g-3 text-center">
+                    <div class="col-6 col-md-3">
+                        <div class="fw-bold fs-5">{{ customer_count }}</div>
+                        <div class="text-muted small">Customers</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="fw-bold fs-5">{{ frame_count }}</div>
+                        <div class="text-muted small">Frames in Stock</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="fw-bold fs-5">{{ lens_count }}</div>
+                        <div class="text-muted small">Lenses in Stock</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="fw-bold fs-5">{{ bill_count }}</div>
+                        <div class="text-muted small">Bills Generated</div>
+                    </div>
+                </div>
+
+                <hr class="mt-4">
+                <div class="text-center text-muted small">
+                    &copy; {{ current_year }} {{ app_name }}. All rights reserved. &bull;
+                    This application has been successfully running {{ run_count }} times
+                </div>
+                <div class="text-center text-muted small mt-1">
+                    {% if license_status.activated %}
+                        This software is fully Licensed. License will expire on
+                        {{ license_status.expiry_date }} &middot; {{ license_status.days_left }} days remaining
+                    {% else %}
+                        This software is not licensed. {{ license_status.error }}
+                    {% endif %}
+                    &middot; <a href="{{ url_for('license_page') }}">Activate / Renew license</a>
+                </div>
+                <div class="text-center text-muted small mt-2">Version 1.0 &middot; Logged in as {{ current_user.name }} ({{ current_user.role }})</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

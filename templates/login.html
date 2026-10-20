@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - VisionCraft OSMS</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page-bg">
+    <button type="button" class="webview-exit-btn" title="Exit application" aria-label="Exit application">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+    <script src="{{ url_for('static', filename='js/webview_exit.js') }}"></script>
+
+    <div class="auth-card">
+        <!-- Header Branding -->
+        <div class="auth-header">
+            <div class="auth-logo-badge">
+                <i class="fa-solid fa-glasses"></i>
+            </div>
+            <h3>VisionCraft OSMS</h3>
+            <p>Optical Store Management System</p>
+        </div>
+
+        <!-- Auth Body Form -->
+        <div class="auth-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show text-start small mb-3 shadow-sm" role="alert">
+                            <i class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('login') }}">
+                <!-- Username / Email Field -->
+                <div class="mb-3">
+                    <label class="auth-form-label">
+                        <span>Username / Email</span>
+                    </label>
+                    <div class="input-group auth-input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" name="username" class="form-control" placeholder="Enter username or email" required autofocus autocomplete="username">
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="mb-4">
+                    <label class="auth-form-label">
+                        <span>Password</span>
+                    </label>
+                    <div class="input-group auth-input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="passwordInput" name="password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+                        <button class="btn btn-outline-secondary border-start-0 border-light-subtle bg-white rounded-end" type="button" id="togglePassword">
+                            <i class="fa-solid fa-eye text-muted" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Action Button -->
+                <button type="submit" class="btn btn-auth-primary w-100 mb-3 shadow-sm">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In
+                </button>
+            </form>
+
+            <!-- Switch to Register Link -->
+            <div class="auth-switch-box">
+                Don't have an account?
+                <a href="{{ url_for('register') }}" class="auth-switch-link">
+                    <i class="fa-solid fa-user-plus me-1"></i> Register
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password Visibility Toggle
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('passwordInput');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+    </script>
+</body>
+</html>

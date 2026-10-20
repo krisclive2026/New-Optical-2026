@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Suppliers - VisionCraft OSMS{% endblock %}
+{% block page_title %}Optical Supplier Management{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-truck-field me-2"></i> Registered Optical Suppliers</h6>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm" style="width: 250px;">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control table-search-input" data-target="suppliersTable" placeholder="Search supplier or contact...">
+            </div>
+            <a href="{{ url_for('supplier_create') }}" class="btn btn-primary btn-sm fw-semibold">
+                <i class="fa-solid fa-plus me-1"></i> Add Supplier
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0" id="suppliersTable">
+            <thead>
+                <tr>
+                    <th>Supplier Name</th>
+                    <th>Contact Person</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Products Supplied</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if suppliers %}
+                    {% for sup in suppliers %}
+                    <tr>
+                        <td class="fw-bold text-primary">
+                            <a href="{{ url_for('supplier_view', supplier_id=sup.id) }}" class="text-primary text-decoration-none">
+                                {{ sup.name }}
+                            </a>
+                        </td>
+                        <td>{{ sup.contact_person or 'N/A' }}</td>
+                        <td><i class="fa-solid fa-phone text-muted me-1 fs-7"></i> {{ sup.phone or 'N/A' }}</td>
+                        <td>{{ sup.email or 'N/A' }}</td>
+                        <td><small class="text-muted">{{ sup.products_supplied or 'Optical frames/lenses' }}</small></td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('supplier_view', supplier_id=sup.id) }}" class="btn btn-outline-info" title="View Supplier"><i class="fa-solid fa-eye"></i></a>
+                                <a href="{{ url_for('supplier_edit', supplier_id=sup.id) }}" class="btn btn-outline-secondary" title="Edit Supplier"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <form method="POST" action="{{ url_for('supplier_delete', supplier_id=sup.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-delete-confirm" data-message="Delete supplier {{ sup.name }}?" title="Delete Supplier"><i class="fa-solid fa-trash-can"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-truck-ramp-box fs-1 text-muted mb-3 d-block"></i>
+                            No suppliers registered yet. Click <b>Add Supplier</b> to register one.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

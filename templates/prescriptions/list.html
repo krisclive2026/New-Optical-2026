@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Eye Test Prescriptions - VisionCraft OSMS{% endblock %}
+{% block page_title %}Eye Test & Prescriptions Module{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-eye me-2"></i> All Eye Prescriptions</h6>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm" style="width: 250px;">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control table-search-input" data-target="rxTable" placeholder="Search customer or doctor...">
+            </div>
+            <a href="{{ url_for('prescription_create') }}" class="btn btn-primary btn-sm fw-semibold">
+                <i class="fa-solid fa-plus me-1"></i> New Prescription
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0" id="rxTable">
+            <thead>
+                <tr>
+                    <th>Rx ID</th>
+                    <th>Customer Name</th>
+                    <th>Rx Date</th>
+                    <th>OD (Right SPH/CYL/AXIS)</th>
+                    <th>OS (Left SPH/CYL/AXIS)</th>
+                    <th>Optometrist</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if prescriptions %}
+                    {% for rx in prescriptions %}
+                    <tr>
+                        <td class="fw-bold text-primary">#RX-{{ rx.id }}</td>
+                        <td>
+                            <a href="{{ url_for('customer_view', customer_id=rx.customer.id) }}" class="fw-semibold text-dark text-decoration-none">
+                                {{ rx.customer.name }}
+                            </a>
+                            <small class="d-block text-muted">{{ rx.customer.phone }}</small>
+                        </td>
+                        <td>{{ rx.prescription_date.strftime('%Y-%m-%d') }}</td>
+                        <td><span class="badge text-bg-light border">{{ rx.spherical_od or '0.00' }} / {{ rx.cyl_od or '0.00' }} / {{ rx.axis_od or '0' }}°</span></td>
+                        <td><span class="badge text-bg-light border">{{ rx.spherical_os or '0.00' }} / {{ rx.cyl_os or '0.00' }} / {{ rx.axis_os or '0' }}°</span></td>
+                        <td>{{ rx.doctor_name or 'Staff' }}</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('prescription_view', rx_id=rx.id) }}" class="btn btn-outline-info" title="View Rx"><i class="fa-solid fa-eye"></i></a>
+                                <form method="POST" action="{{ url_for('prescription_delete', rx_id=rx.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-delete-confirm" data-message="Are you sure you want to delete this prescription?" title="Delete Rx"><i class="fa-solid fa-trash-can"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-eye-slash fs-1 text-muted mb-3 d-block"></i>
+                            No eye prescriptions found. Click <b>New Prescription</b> to record an eye test.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

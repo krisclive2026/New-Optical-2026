@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Inventory & Stock Audit - VisionCraft OSMS{% endblock %}
+{% block page_title %}Inventory & Stock Management{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 border-start border-warning border-4">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted text-uppercase fs-7 font-weight-bold">Low-Stock Warning Alert</h6>
+                    <h3 class="fw-bold text-warning mb-0">{{ low_stock_items|length }} Item(s) Need Reorder</h3>
+                </div>
+                <i class="fa-solid fa-triangle-exclamation fs-1 text-warning"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 border-start border-primary border-4">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted text-uppercase fs-7 font-weight-bold">Stock Adjustment Action</h6>
+                    <p class="text-muted small mb-0">Record manual inventory stock-in or breakage stock-out</p>
+                </div>
+                <a href="{{ url_for('inventory_adjust') }}" class="btn btn-primary fw-semibold">
+                    <i class="fa-solid fa-boxes-packing me-1"></i> Stock Adjust Form
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Table -->
+{% if low_stock_items %}
+<div class="card shadow-sm border-0 mb-4 border-warning">
+    <div class="card-header bg-warning-subtle py-3">
+        <h6 class="m-0 font-weight-bold text-dark"><i class="fa-solid fa-bell me-2 text-warning"></i> Low-Stock Products Requiring Supply Order</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Product Code</th>
+                    <th>Brand & Name</th>
+                    <th>Current Quantity</th>
+                    <th>Min Threshold</th>
+                    <th>Supplier</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in low_stock_items %}
+                <tr>
+                    <td><span class="badge text-bg-light border">{{ item.item_type }}</span></td>
+                    <td class="fw-bold text-primary">{{ item.code }}</td>
+                    <td class="fw-semibold">{{ item.name }}</td>
+                    <td class="fw-bold text-danger fs-6">{{ item.quantity }}</td>
+                    <td>{{ item.min_stock }}</td>
+                    <td>{{ item.supplier }}</td>
+                    <td>
+                        <a href="{{ url_for('inventory_adjust', item_type=item.item_type, item_id=item.id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fa-solid fa-plus me-1"></i> Restock In
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Inventory Transaction Log -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fa-solid fa-clock-rotate-left me-2"></i> Inventory Transaction Audit Trail</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table custom-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Item Type</th>
+                    <th>Product Name</th>
+                    <th>Transaction Type</th>
+                    <th>Quantity Change</th>
+                    <th>Reference / Order #</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if transactions %}
+                    {% for txn in transactions %}
+                    <tr>
+                        <td>{{ txn.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td><span class="badge text-bg-light border">{{ txn.item_type }}</span></td>
+                        <td class="fw-semibold">{{ txn.item_name or ('Item #' ~ txn.item_id) }}</td>
+                        <td>
+                            {% if txn.transaction_type == 'Stock In' %}
+                            <span class="badge text-bg-success"><i class="fa-solid fa-arrow-down me-1"></i> Stock In</span>
+                            {% elif txn.transaction_type == 'Stock Out' %}
+                            <span class="badge text-bg-danger"><i class="fa-solid fa-arrow-up me-1"></i> Stock Out</span>
+                            {% else %}
+                            <span class="badge text-bg-info text-white"><i class="fa-solid fa-sliders me-1"></i> Adjustment</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold {% if txn.transaction_type == 'Stock In' %}text-success{% else %}text-danger{% endif %}">
+                            {% if txn.transaction_type == 'Stock In' %}+{% else %}-{% endif %}{{ txn.quantity }}
+                        </td>
+                        <td><small class="text-muted">{{ txn.reference or 'Manual' }}</small></td>
+                        <td><small class="text-muted">{{ txn.notes or '-' }}</small></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            No inventory transaction logs found.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
